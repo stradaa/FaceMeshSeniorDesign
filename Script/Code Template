@@ -1,0 +1,24 @@
+# 1. Installing and Importing Dependencies
+
+# 2. Make Detections (webcam input)
+
+# 3. Initializing Face Mesh Model
+
+# 4. Export to CSV
+
+# 5. Custom Model (Geometric Computational Model)
+# 5.1 Read in Collected Data
+# 5.2 Comparative Processing Techniques
+# 5.3 Evaluate and Serialize Model (Convert Object->Bytes)
+
+# 6. Make Detections with Model
+
+
+Kivy Stuff
+MBLabelStyles: https://raw.githubusercontent.com/HeaTTheatR/KivyMD-data/master/gallery/kivymddoc/md-label-font-style.gif
+Icons: https://github.com/kivymd/KivyMD/blob/master/kivymd/icon_definitions.py
+
+Documentation: https://buildmedia.readthedocs.org/media/pdf/kivymd/latest/kivymd.pdf
+
+App Designs Ideas:
+https://dribbble.com/shots/15991503--Learning-Apps

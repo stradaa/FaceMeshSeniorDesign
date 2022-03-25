@@ -1,0 +1,60 @@
+MDScreen:
+    name: "AboutPage"
+
+    canvas.before:
+        Color:
+            rgba: (227/255, 238/255, 229/255, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDToolbar:
+            title: 'About Us'
+            md_bg_color: (39/255, 122/255, 81/255, 1)
+            specific_text_color: [1, 1, 1, 1]
+            left_action_items: [["backburger", lambda x: app.change_screen()]]
+
+        MDLabel:
+            text: 'Big Brain Team'
+            size_hint: (1, 0.15)
+            halign: 'center'
+            font_style: "H2"
+            font_size: self.width/15
+
+        ScrollView:
+            do_scroll_y: True
+
+            MDGridLayout:
+                cols: 2
+                size_hint_y: 0.8
+                padding: [0, 20, 0, 0]
+                spacing:
+
+                Image:
+                    source: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/Gigi.png'
+                    allows_stretch: True
+                MDLabel:
+                    text: "Gigi is Italian"
+                Image:
+                    source: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/Alex.png'
+                    allows_stretch: True
+                MDLabel:
+                    text: "Alex likes bacon"
+                Image:
+                    source: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/Lauren.png'
+                    allows_stretch: True
+                MDLabel:
+                    text: "Lauren broke her femur"
+                Image:
+                    source: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/Kelsey.png'
+                    allows_stretch: True
+                MDLabel:
+                    text: "Kelsey loves sports"
+                Image:
+                    source: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/Sahand.png'
+                    allows_stretch: True
+                MDLabel:
+                    text: "Sahand is Sahand"

@@ -1,0 +1,29 @@
+MDScreen:
+    name: "UserProfile"
+
+    canvas.before:
+        Color:
+            rgba: (227/255, 238/255, 229/255, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDToolbar:
+            title: 'Profile'
+            md_bg_color: (39/255, 122/255, 81/255, 1)
+            specific_text_color: [1, 1, 1, 1]
+            left_action_items: [["backburger", lambda x: app.change_screen()]]
+
+        FloatLayout:
+            spacing: 10
+            padding: 10
+
+            MDLabel:
+                text: "Coming Soon"
+                font_style: 'H2'
+                halign: 'center'
+                size_hint: (0.4, 0.08)
+                font_size: self.width/9

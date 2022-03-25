@@ -1,0 +1,94 @@
+MDScreen:
+    name: "MainScreen"
+
+    canvas.before:
+        Color:
+            rgba: (227/255, 238/255, 229/255, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        padding: 30
+        MDToolbar:
+            id: toolbar
+            title: 'NeuroVA Dashboard'
+            md_bg_color: (39/255, 122/255, 81/255, 1)
+            specific_text_color: [1, 1, 1, 1]
+            left_action_items: [["menu", lambda x: app.for_now()]]
+            right_action_items: [["clock", lambda x: app.for_now()]]
+            elevation: 10
+
+        MDGridLayout:
+            cols: 2
+            padding: [20, 40, 20, 40]
+            spacing: 15
+
+            FitImage:
+                source: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/FaceMeshMain.png'
+                #allows_stretch: True
+                on_touch_down:
+                    app.go_back_screen_once("ExamPage") if self.collide_point(*args[1].pos) else False
+                radius: [20,]
+            FitImage:
+                source: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/U1_Instructions.png'
+                allows_stretch: True
+                radius: [20,]
+            FitImage:
+                source: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/Tile-Profile.png'
+                #allows_stretch: True
+                on_touch_down:
+                    app.go_back_screen_once("UserProfile") if self.collide_point(*args[1].pos) else False
+                radius: [20,]
+            FitImage:
+                source: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/Tile-Schedule.png'
+                allows_stretch: True
+                radius: [20,]
+
+        NavBar:
+            size_hint: 0.85, .1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+            elevation: 10
+            md_bg_color: 1, 1, 1, 1
+            radius: [16]
+
+            MDGridLayout:
+                padding: 20, 0, 0, 20
+                cols: 4
+                adaptive_width: True
+                pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+                spacing: root.width/11
+
+                MDIconButton:
+                    id: nav_icon1
+                    icon: "home"
+                    ripple_scale: 0
+                    user_font_size: "35sp"
+                    theme_text_color: "Custom"
+                    text_color: (43/255, 87/255, 47/255, 1)
+                MDIconButton:
+                    id: nav_icon2
+                    icon: "face-recognition"
+                    ripple_scale: 0
+                    user_font_size: "35sp"
+                    theme_text_color: "Custom"
+                    text_color: (43/255, 87/255, 47/255, 1)
+                MDIconButton:
+                    id: nav_icon3
+                    icon: 'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo Images/Icon-Settings.png'
+                    ripple_scale: 0
+                    user_font_size: "35sp"
+                    theme_text_color: "Custom"
+                    text_color: (43/255, 87/255, 47/255, 1)
+                    #on_release:
+
+                MDIconButton:
+                    id: nav_icon4
+                    icon: "brain"
+                    ripple_scale: 0
+                    user_font_size: "35sp"
+                    theme_text_color: "Custom"
+                    text_color: (43/255, 87/255, 47/255, 1)
+                    on_release:
+                        root.manager.current = "AboutPage"

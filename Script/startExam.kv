@@ -1,0 +1,81 @@
+MDScreen:
+    name: "ExamPage"
+
+    canvas.before:
+        Color:
+            rgba: (227/255, 238/255, 229/255, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDToolbar:
+            title: 'NeuroVA FaceMesh'
+            md_bg_color: (39/255, 122/255, 81/255, 1)
+            specific_text_color: [1, 1, 1, 1]
+            left_action_items: [["backburger", lambda x: app.change_screen()]]
+
+        MDTabs:
+            id: AllTabs
+            on_tab_switch: app.on_tab_switch(*args)
+
+            Tab:
+                title: "Exam"
+
+            Tab:
+                title: "Results"
+                content_text: f"This is an example text for {self.title}"
+
+            Tab:
+                title: "Statistics"
+                content_text: f"This is an example text for {self.title}"
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        spacing: 15
+        padding: 20
+
+        MDLabel:
+            # Float Layout should fix format issues
+            text: ""
+            size_hint: (1, 0.2)
+
+        MDLabel:
+            text: "FaceMesh Virtual Assessment"
+            size_hint: (1, 0.2)
+            pos_hint: {"y": 0.5}
+            halign: 'center'
+            font_style: "H2"
+            font_size: self.width/12
+        MDLabel:
+            text: "Your Ordered Exams:"
+            size_hint: (1, 0.2)
+            pos_hint: {"x": 0.02, "y": 0.8}
+            #halign: 'center'
+            font_style: "H2"
+            font_size: self.width/20
+        ScrollView:
+            MDList:
+                md_bg_color: (1, 1, 1, 1)
+                id: container
+                TwoLineListItem:
+                    text: "Full Face Exam"
+                    secondary_text: "2/23/2022"
+                TwoLineListItem:
+                    text: "Partial Face Exam"
+                    secondary_text: "2/19/2022"
+
+    FloatLayout:
+        MDRectangleFlatButton:
+            text: "Start New"
+            theme_text_color: "Custom"
+            md_bg_color: 1, 1, 1, 1
+            text_color: (39/255, 122/255, 81/255, 1)
+            line_color: (39/255, 122/255, 81/255, 1)
+
+            pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+            size_hint: (0.4, 0.08)
+            font_size: self.width/12
+            on_press: root.manager.current = "MPFaceMesh"
