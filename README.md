@@ -5,4 +5,4 @@ To address the need for accessible take-at-home ND exams, our team is focusing o
 
 Application is built for cross-platform support using Python and Kivy.
 
-Members: Sahand Salari-Namin, Gabriella Bond, Lauren Demele, Kelsey Krist
+Members: Alex Estrada, Sahand Salari-Namin, Gabriella Bond, Lauren Demele, Kelsey Krist
