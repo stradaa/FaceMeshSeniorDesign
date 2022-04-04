@@ -104,6 +104,7 @@ class Geometric_Computation(MediaPipe_Method):
     def mid_norm_plot(self, plot=True):
         for idx, norm_dict in enumerate(self.norm_array_dicts):
             self.norm_array_dicts[idx] = self.norm_array_dicts[idx] - self.mid[idx]
+        # print("Scaling with respect to sagittal line complete")
         if plot:
             for i in self.norm_array_dicts:
                 x = []
@@ -121,7 +122,7 @@ class Geometric_Computation(MediaPipe_Method):
         for i in self.norm_array_dicts:
             self.upper_splits.append(i[0:upper_num-1])
             self.lower_splits.append(i[upper_num:upper_num+lower_num])
-        print(len(self.upper_splits)*2, "lower & upper splits successful")
+        print(len(self.upper_splits), "upper & ", len(self.lower_splits)," lower splits successful")
 
     def upper_diffs(self):
         base = self.upper_splits.pop(0)
@@ -142,12 +143,11 @@ class Geometric_Computation(MediaPipe_Method):
         upper_diffs = Geometric_Computation.upper_diffs(self)
         lower_diffs = Geometric_Computation.lower_diffs(self)
 
-
     @staticmethod
     def compute_icp(reference_points, points):
         transformation_history, aligned_points = icp(reference_points,
                                                      points,
-                                                     verbose=True)
+                                                     verbose=False)
         # show results
         plt.plot(reference_points[:, 0], reference_points[:, 1], 'rx', label='original points')
         plt.plot(points[:, 0], points[:, 1], 'b1', label='mirrored points')
@@ -165,12 +165,21 @@ class Geometric_Computation(MediaPipe_Method):
         distances = []
         for idx, array in enumerate(reference_points):
             out, aligned = Geometric_Computation.compute_icp(array, points[idx])
+            distances.append(np.linalg.norm(array - aligned, axis=1))
 
-        # reference_points, aligned_points = Geometric_Computation.compute_icp(self.norm_array_dicts[0],
-        #                                                                      self.norm_array_dicts[1])
-        # Using Euclidean distance
-        # dist = np.linalg.norm(reference_points-aligned_points, axis=1)
-        # print("Euclidean Distance:", dist)
+        upper_num = len(self.eyebrow_index + self.eye_index)
+
+        average_all = []
+        upper_lower = []
+
+        for i in distances:
+            high = np.mean(i[0:upper_num-1])
+            low = np.mean(i[upper_num:])
+
+            upper_lower.append([high, low])
+            average_all.append(np.mean(i))
+
+        return distances, average_all,  upper_lower
 
     def all_diffs(self):
         prim = np.subtract(self.norm_array_dict2, self.norm_array_dict1)**2
