@@ -139,12 +139,12 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
         elif index == 3:
             self.image4 = frame
             cv2.imwrite(name, self.image4)
-        elif index == 4:
-            self.image5 = frame
-            cv2.imwrite(name, self.image5)
-        elif index == 5:
-            self.image6 = frame
-            cv2.imwrite(name, self.image6)
+        # elif index == 4:
+        #     self.image5 = frame
+        #     cv2.imwrite(name, self.image5)
+        # elif index == 5:
+        #     self.image6 = frame
+        #     cv2.imwrite(name, self.image6)
 
         # calling newly created image
         self.root.ids[id_name].source = directory + "\\" + name
@@ -169,45 +169,54 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
         bob.ids[
             'mp_image4'].source = r'C:\Users\Alex Estrada\PycharmProjects\FaceMeshSeniorDesign\temp_images\MP_img4.jpg'
 
-        bob.ids['LeftAlt'].text = "Avg. Left Alteration: " + str(self.results[1])
-        bob.ids['RightAlt'].text = "Avg. Right Alteration: " + str(self.results[0])
-        bob.ids['nrValue'].text = "nR-Value: " + str(self.results[2])
-        bob.ids['nu_rValue'].text = "nu_r-Value: " + str(self.results[3])
+        # bob.ids['LeftAlt'].text = "Avg. Left Alteration: " + str(self.results[1])
+        # bob.ids['RightAlt'].text = "Avg. Right Alteration: " + str(self.results[0])
+        # bob.ids['nrValue'].text = "nR-Value: " + str(self.results[2])
+        # bob.ids['nu_rValue'].text = "nu_r-Value: " + str(self.results[3])
 
     def MP_Method(self):
+        pre_images = [self.image1, self.image2, self.image3, self.image4]
+        post_images = []
+
+        for i in pre_images:
+            if i is not None:
+                post_images.append(i)
+
+        if len(post_images) != 4:
+            print("NOT ALL EXPRESSIONS ARE BEING TESTED")
 
         # MediaPipe
-        image_test = MediaPipe_Method(self.refs)
+        image_test = MediaPipe_Method(self.refs, post_images)
+        original_dicts, mirrored_dicts, mp_imgs, mp_mirrored_imgs = image_test.mp_run("", 0)
 
-        img1_results, img1_out = image_test.mp_process(self.image1)
-        img2_results, img2_out = image_test.mp_process(self.image2)
-        img3_results, img3_out = image_test.mp_process(self.image3)
-        img4_results, img4_out = image_test.mp_process(self.image4)
-        # img5_results, img5_out = image_test.mp_process(self.image5)
-        # img6_results, img6_out = image_test.mp_process(self.image6)
-
-        self.mp_result1 = img1_out
-        self.mp_result2 = img2_out
-        self.mp_result3 = img3_out
-        self.mp_result4 = img4_out
+        self.mp_result1 = mp_imgs[0]
+        self.mp_result2 = mp_imgs[1]
+        self.mp_result3 = mp_imgs[2]
+        self.mp_result4 = mp_imgs[3]
 
         cv2.imwrite("MP_img1.jpg", self.mp_result1)
         cv2.imwrite("MP_img2.jpg", self.mp_result2)
         cv2.imwrite("MP_img3.jpg", self.mp_result3)
         cv2.imwrite("MP_img4.jpg", self.mp_result4)
 
-        # self.mp_result5 = img5_out
-        # self.mp_result6 = img6_out
-
         # GCM
-        patient = Geometric_Computation([img1_results, img2_results])
-        patient.pop_refs(self.refs)
-        patient.show_dicts()
-        patient.factor_dicts()
-        patient.all_diffs()
-        patient.show_results()
+        patient = Geometric_Computation(original_dicts)
+        mirrored_patient = Geometric_Computation(mirrored_dicts)
 
-        self.results = patient.results
+        original_mirrored_dist, all_avg, upper_lower_split_avg = patient.get_icp_distances(
+            mirrored_patient.norm_array_dicts)
+
+        for idx, i in enumerate(original_mirrored_dist):
+            print("----------------------------------------ALTERNATE MODEL "
+                  "RESULTS-----------------------------------------")
+            print("IMG", idx + 1, ":")
+            # print("All original-to-mirrored distances:", i)
+            print("Upper Asymmetry Score:", upper_lower_split_avg[idx][0] * 10000)
+            print("Lower Asymmetry Score:", upper_lower_split_avg[idx][1] * 10000)
+            print("Weighted Average:", all_avg[idx] * 10000)
+
+        # patient.GCM1()
+        patient.GCM2()
 
     def refresh_test(self, root):
         root.ids["label1"].text = "START"
@@ -224,9 +233,9 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def delete_temps(self):
         for filename in os.listdir(r'C:\Users\Alex Estrada\PycharmProjects\FaceMeshSeniorDesign\temp_images'):
-            print(filename)
+            # print(filename)
             os.remove(filename)
-        return "TEMP PHOTOS REMOVED"
+        return print("ALL TEMP PHOTOS REMOVED")
 
 
 class LoadingScreen(Screen):
@@ -269,7 +278,7 @@ class MyApp(MDApp):
     def on_start(self):
         # 15 sec delay
         # screen_manager.current = 'MPFaceMesh'
-        Clock.schedule_once(self.change_screen, 10)
+        Clock.schedule_once(self.change_screen, 1)
 
     def change_screen(self, *args):
         screen_manager.current = "MainScreen"

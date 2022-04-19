@@ -6,6 +6,7 @@ Concrete MediaPipe module
 """
 
 import mediapipe as mp
+import pandas as pd
 import cv2
 
 
@@ -23,9 +24,10 @@ class MediaPipe_Method:
                  159, 386, 158, 385, 157, 384, 173, 398, 133, 362, 7, 249, 163, 390, 144, 373, 145, 374,
                  153, 380, 154, 381, 155, 382]
     eyebrow_index = [70, 300, 63, 293, 105, 334, 66, 296, 107, 336, 46, 276,
-                     53, 283, 52, 282, 65, 295, 55, 285]
-    center_index = [0, 2, 1, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 94, 151, 164, 168,
-                    175, 197, 195, 199, 200]
+                     53, 283, 52, 282, 65, 295, 55, 285, 189, 413]
+    # center_index = [0, 2, 1, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 94, 151, 164, 168,
+    #                 175, 197, 195, 199, 200]
+    center_index = [6]
     upper = eyebrow_index+eye_index
     lower = mouth_index
 
@@ -39,7 +41,7 @@ class MediaPipe_Method:
 
         self.all_index = self.upper + self.lower + self.refs + self.center
 
-    def mp_run(self):
+    def mp_run(self, name=None, save=True):
         raw_imgs = self.imgs
         mirrored_imgs = []
         for img in raw_imgs:
@@ -49,23 +51,46 @@ class MediaPipe_Method:
         edited_imgs = []
         mirrored_dicts = []
         edited_mirrored_imgs = []
+        all_landmarks_originals = []
+        all_landmarks_mirrored_plural = []
 
         for idx, img in enumerate(raw_imgs):
-            img_dict, edited_img = MediaPipe_Method.mp_process(self, img)
-            mirrored_dict, edited_mirrored_img = MediaPipe_Method.mp_process(self, mirrored_imgs[idx])
+            img_dict, edited_img, all_landmarks_original = MediaPipe_Method.mp_process(self, img)
+            mirrored_dict, edited_mirrored_img, all_landmarks_mirrored = MediaPipe_Method.mp_process(self, mirrored_imgs[idx])
             # appending dictionary list
             img_dicts.append(img_dict)
             mirrored_dicts.append(mirrored_dict)
             # appending images
             edited_imgs.append(edited_img)
             edited_mirrored_imgs.append(edited_mirrored_img)
+            # appending all landmarks
+            all_landmarks_originals.append(all_landmarks_original)
+            all_landmarks_mirrored_plural.append(all_landmarks_mirrored)
 
+        if save:
+            path = "../Data/" + name + ".csv"
+
+            dfs_temp = []
+            dfs_temp2 = []
+            for i in all_landmarks_originals:
+                df = pd.DataFrame.from_dict(i, orient='index', columns=['X', 'Y'])
+                dfs_temp.append(df)
+            for i in all_landmarks_mirrored_plural:
+                df = pd.DataFrame.from_dict(i, orient='index', columns=["I", "J"])
+                dfs_temp2.append(df)
+
+            result_df = pd.concat(dfs_temp, axis=1)     # original
+            result_df2 = pd.concat(dfs_temp2, axis=1)   # mirrored
+            final_df = pd.concat([result_df, result_df2], axis=1)
+
+            final_df.to_csv(path)
         return img_dicts, mirrored_dicts, edited_imgs, edited_mirrored_imgs
 
     def mp_process(self, img):
         index_list = self.all_index
         mp_face_mesh = mp.solutions.face_mesh
         img_dict = {}
+        all_landmarks = {}
         with mp_face_mesh.FaceMesh(
             static_image_mode=True,
             max_num_faces=1,
@@ -75,6 +100,12 @@ class MediaPipe_Method:
             # covert BGR to RGB before processing
             results = face_mesh.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
         for face_landmarks in results.multi_face_landmarks:
+
+            for k in range(0, 468):
+                x1 = int(face_landmarks.landmark[k].x * width)
+                y1 = int(face_landmarks.landmark[k].y * height)
+                all_landmarks[k] = [x1, y1]
+
             for j in index_list:
                 x = int(face_landmarks.landmark[j].x * width)
                 y = int(face_landmarks.landmark[j].y * height)
@@ -85,4 +116,4 @@ class MediaPipe_Method:
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-        return img_dict, edited_img
+        return img_dict, edited_img, all_landmarks
