@@ -108,7 +108,7 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def load_frame(self, id, root):
         self.root = root
-        self.capture = cv2.VideoCapture(1)
+        self.capture = cv2.VideoCapture(0)
         self.clock = Clock.schedule_interval(self.load_video, 1.0 / 30.0)
 
     def detect_face(self):
