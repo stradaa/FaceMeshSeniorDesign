@@ -5,8 +5,8 @@ NeuroVA Script
 # Copyright (c) 2022-Current Alex Estrada <aestradab@ucdavis.edu>
 """
 
-from Code.face_mesh_mediapipe import MediaPipe_Method
-from GCM.geometric_computation import Geometric_Computation
+from face_mesh_mediapipe import MediaPipe_Method
+from geometric_computation import Geometric_Computation
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt

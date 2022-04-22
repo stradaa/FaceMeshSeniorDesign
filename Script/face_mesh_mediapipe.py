@@ -69,7 +69,7 @@ class MediaPipe_Method:
                 all_landmarks_mirrored_plural.append(all_landmarks_mirrored)
 
         if save:
-            path = "../Data/" + name + ".csv"
+            path = "./data/" + name + ".csv"
 
             dfs_temp = []
             dfs_temp2 = []

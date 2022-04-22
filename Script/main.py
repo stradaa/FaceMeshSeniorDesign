@@ -1,5 +1,5 @@
-from Code.face_mesh_mediapipe import MediaPipe_Method
-from GCM.geometric_computation import Geometric_Computation
+from face_mesh_mediapipe import MediaPipe_Method
+from geometric_computation import Geometric_Computation
 from kivymd.app import MDApp
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.properties import ObjectProperty
@@ -30,13 +30,18 @@ from kivymd.uix.datatables import MDDataTable
 import os
 import math
 import mediapipe as mp
+from kivy.config import Config
+Config.set('graphics', 'resizable', True)
+Config.set('graphics', 'width', '750')
+Config.set('graphics', 'height', '1200')
+Config.write()
+
+Window.size = (90 * 7, 160 * 7)  # remove this for deployment
 
 resource_add_path('.')
 
 mp_face_detection = mp.solutions.face_detection
 mp_drawing = mp.solutions.drawing_utils
-
-Window.size = (90 * 6, 160 * 6)  # remove this for deployment
 
 
 class MainScreen(Screen):
@@ -196,8 +201,7 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def take_picture(self, index):
         # ensuring directory for later deletion
-        directory = r'..\temp_images'
-        os.chdir(directory)
+        directory = r'./temp_images'
         # keep track of number of pics taken
         self.num_of_pics += 1
         # creating new image source
@@ -211,16 +215,16 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
         if index == 0:
             self.image1 = frame
-            cv2.imwrite(name, self.image1)
+            cv2.imwrite(directory + "/" + name, self.image1)
         elif index == 1:
             self.image2 = frame
-            cv2.imwrite(name, self.image2)
+            cv2.imwrite(directory + "/" + name, self.image2)
         elif index == 2:
             self.image3 = frame
-            cv2.imwrite(name, self.image3)
+            cv2.imwrite(directory + "/" + name, self.image3)
         elif index == 3:
             self.image4 = frame
-            cv2.imwrite(name, self.image4)
+            cv2.imwrite(directory + "/" + name, self.image4)
 
         # calling newly created image
         self.root.ids[id_name].source = directory + "/" + name
@@ -237,13 +241,13 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def show_mp_results(self, bob):
         bob.ids[
-            'mp_image1'].source = r'../temp_images/MP_img1.jpg'
+            'mp_image1'].source = r'./temp_images/MP_img1.jpg'
         bob.ids[
-            'mp_image2'].source = r'../temp_images/MP_img2.jpg'
+            'mp_image2'].source = r'./temp_images/MP_img2.jpg'
         bob.ids[
-            'mp_image3'].source = r'../temp_images/MP_img3.jpg'
+            'mp_image3'].source = r'./temp_images/MP_img3.jpg'
         bob.ids[
-            'mp_image4'].source = r'../temp_images/MP_img4.jpg'
+            'mp_image4'].source = r'./temp_images/MP_img4.jpg'
 
         bob.ids['LeftAlt'].text = "Data Collection Successful"
         bob.ids['RightAlt'].text = "ID Recorded: " + self.profile_id
@@ -260,6 +264,7 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
             self.profile_id = 'UNKNOWN'
 
     def MP_Method(self):
+        directory = r'./temp_images/'
         pre_images = [self.image1, self.image2, self.image3, self.image4]
         post_images = []
 
@@ -279,10 +284,10 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
         self.mp_result3 = mp_imgs[2]
         self.mp_result4 = mp_imgs[3]
 
-        cv2.imwrite("MP_img1.jpg", self.mp_result1)
-        cv2.imwrite("MP_img2.jpg", self.mp_result2)
-        cv2.imwrite("MP_img3.jpg", self.mp_result3)
-        cv2.imwrite("MP_img4.jpg", self.mp_result4)
+        cv2.imwrite(directory + "MP_img1.jpg", self.mp_result1)
+        cv2.imwrite(directory + "MP_img2.jpg", self.mp_result2)
+        cv2.imwrite(directory + "MP_img3.jpg", self.mp_result3)
+        cv2.imwrite(directory + "MP_img4.jpg", self.mp_result4)
 
         # GCM
         patient = Geometric_Computation(original_dicts)
@@ -305,14 +310,14 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def refresh_test(self, root):
         root.ids["label1"].text = "START"
-        root.ids["web_feed"].source = r'../Kivy Logo Images/TestLiveStream.png'
-        root.ids["image1"].source = r'../Kivy Logo Images/4.png'
-        root.ids["image2"].source = r'../Kivy Logo Images/5.png'
-        root.ids["image3"].source = r'../Kivy Logo Images/6.png'
-        root.ids["image4"].source = r'../Kivy Logo Images/7.png'
+        root.ids["web_feed"].source = r'./Kivy Logo Images/TestLiveStream.png'
+        root.ids["image1"].source = r'./Kivy Logo Images/4.png'
+        root.ids["image2"].source = r'./Kivy Logo Images/5.png'
+        root.ids["image3"].source = r'./Kivy Logo Images/6.png'
+        root.ids["image4"].source = r'./Kivy Logo Images/7.png'
 
     def delete_temps(self):
-        for filename in os.listdir(r'../temp_images'):
+        for filename in os.listdir(r'./temp_images'):
             try:
                 os.remove('*')
             except OSError:
@@ -361,8 +366,8 @@ class MyApp(MDApp):
 
     def on_start(self):
         # 15 sec delay
-        screen_manager.current = 'UserProfile'
-        # Clock.schedule_once(self.change_screen, 1)
+        # screen_manager.current = 'UserProfile'
+        Clock.schedule_once(self.change_screen, 5)
 
     def change_screen(self, *args):
         screen_manager.current = "MainScreen"

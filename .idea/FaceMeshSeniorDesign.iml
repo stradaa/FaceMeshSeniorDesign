@@ -6,7 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/GCM" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Images" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Script" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Kivy Logo Images" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Script/Kivy Logo Images" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
