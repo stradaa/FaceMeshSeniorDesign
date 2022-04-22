@@ -55,17 +55,18 @@ class MediaPipe_Method:
         all_landmarks_mirrored_plural = []
 
         for idx, img in enumerate(raw_imgs):
-            img_dict, edited_img, all_landmarks_original = MediaPipe_Method.mp_process(self, img)
-            mirrored_dict, edited_mirrored_img, all_landmarks_mirrored = MediaPipe_Method.mp_process(self, mirrored_imgs[idx])
-            # appending dictionary list
-            img_dicts.append(img_dict)
-            mirrored_dicts.append(mirrored_dict)
-            # appending images
-            edited_imgs.append(edited_img)
-            edited_mirrored_imgs.append(edited_mirrored_img)
-            # appending all landmarks
-            all_landmarks_originals.append(all_landmarks_original)
-            all_landmarks_mirrored_plural.append(all_landmarks_mirrored)
+            if hasattr(img, 'shape'):
+                img_dict, edited_img, all_landmarks_original = self.mp_process(img)
+                mirrored_dict, edited_mirrored_img, all_landmarks_mirrored = self.mp_process(mirrored_imgs[idx])
+                # appending dictionary list
+                img_dicts.append(img_dict)
+                mirrored_dicts.append(mirrored_dict)
+                # appending images
+                edited_imgs.append(edited_img)
+                edited_mirrored_imgs.append(edited_mirrored_img)
+                # appending all landmarks
+                all_landmarks_originals.append(all_landmarks_original)
+                all_landmarks_mirrored_plural.append(all_landmarks_mirrored)
 
         if save:
             path = "../Data/" + name + ".csv"
@@ -94,7 +95,7 @@ class MediaPipe_Method:
         with mp_face_mesh.FaceMesh(
             static_image_mode=True,
             max_num_faces=1,
-            min_detection_confidence=0.5) as face_mesh:
+                min_detection_confidence=0.5) as face_mesh:
             height, width, val = img.shape
             edited_img = img.copy()
             # covert BGR to RGB before processing

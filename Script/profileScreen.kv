@@ -17,13 +17,59 @@ MDScreen:
             specific_text_color: [1, 1, 1, 1]
             left_action_items: [["backburger", lambda x: app.change_screen()]]
 
-        FloatLayout:
-            spacing: 10
-            padding: 10
+        MDBoxLayout:
+            orientation: 'vertical'
+            # left, right,
+            padding: [0, 10, 0, 0]
+            spacing: 15
 
             MDLabel:
-                text: "Coming Soon"
-                font_style: 'H2'
+                id: label1
+                text: "Set-Up ID"
+                size_hint: (1, 0.15)
                 halign: 'center'
-                size_hint: (0.4, 0.08)
-                font_size: self.width/9
+                font_style: "H2"
+                font_size: self.width/17
+
+            MDFloatLayout:
+                md_bg_color: 1, 1, 1, 1
+                orientation: 'vertical'
+
+                MDTextField:
+                    id: name
+                    hint_text: "Name / ID"
+                    mode: "fill"
+                    color_mode: 'accent'
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.75}
+                    size_hint: (0.8, 0.1)
+
+                MDTextField:
+                    id: date
+                    hint_text: "Date (dd,mm,yyy)"
+                    mode: "fill"
+                    color_mode: 'accent'
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+                    size_hint: (0.8, 0.1)
+
+                MDTextField:
+                    id: comment
+                    hint_text: "Comments"
+                    mode: "fill"
+                    color_mode: 'accent'
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+                    size_hint: (0.8, 0.1)
+
+                MDRectangleFlatIconButton:
+                    icon: "dots-hexagon"
+                    text: "Ready"
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.3}
+                    user_font_size: "45sp"
+                    theme_text_color: "Custom"
+                    theme_icon_color: "Custom"
+                    line_color: (39/255, 122/255, 81/255, 1)
+                    text_color: (39/255, 122/255, 81/255, 1)
+                    icon_color: (39/255, 122/255, 81/255, 1)
+                    on_release:
+                        app.MP.profile_setup(root)
+
+

@@ -21,12 +21,20 @@ from kivy.graphics.texture import Texture
 from kivymd.uix.behaviors import FakeRectangularElevationBehavior
 from kivy.clock import Clock
 from kivy.uix.widget import Widget
+from kivy.resources import resource_add_path
+from kivymd.uix.dialog import MDDialog
 import cv2
 from kivymd.uix.snackbar import Snackbar
 from kivy.metrics import dp
 from kivymd.uix.datatables import MDDataTable
 import os
+import math
 import mediapipe as mp
+
+resource_add_path('.')
+
+mp_face_detection = mp.solutions.face_detection
+mp_drawing = mp.solutions.drawing_utils
 
 Window.size = (90 * 6, 160 * 6)  # remove this for deployment
 
@@ -43,7 +51,7 @@ class NavBar(FakeRectangularElevationBehavior, MDFloatLayout):
     pass
 
 
-class ExamPage(Screen, MDTabsBase, MDFloatLayout):
+class ExamPage(Screen, MDTabsBase, MDFloatLayout, MDDialog):
     pass
 
 
@@ -59,7 +67,12 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def __init__(self, **kw):
         super().__init__(**kw)
+        self.profile_id = None
+        self.profile_date = None
+        self.profile_comments = None
+
         self.frame = None
+        self.MP = None
 
         self.capture = None
         self.image1 = None
@@ -90,31 +103,100 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def load_frame(self, id, root):
         self.root = root
-        self.capture = cv2.VideoCapture(0)
+        self.capture = cv2.VideoCapture(1)
         self.clock = Clock.schedule_interval(self.load_video, 1.0 / 30.0)
 
+    def detect_face(self):
+        with mp_face_detection.FaceDetection(
+                model_selection=0, min_detection_confidence=0.5) as face_detection:
+            while self.capture.isOpened():
+                success, image = self.capture.read()
+                if not success:
+                    print("Ignoring empty camera frame.")
+                    # If loading a video, use 'break' instead of 'continue'.
+                    continue
+
+                # To improve performance, optionally mark the image as not writeable to
+                # pass by reference.
+                image.flags.writeable = False
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                results = face_detection.process(image)
+
+                if results.detections:
+                    return results.detections[0]
+                else:
+                    return None
+                # # Flip the image horizontally for a selfie-view display.
+                # cv2.imshow('MediaPipe Face Detection', cv2.flip(image, 1))
+                # if cv2.waitKey(5) & 0xFF == 27:
+                #     break
+        # self.capture.release()
+
+    def _normalized_to_pixel_coordinates(self, normalized_x, normalized_y, image_width, image_height):
+        """Converts normalized value pair to pixel coordinates."""
+
+        # Checks if the float value is between 0 and 1.
+        def is_valid_normalized_value(value: float) -> bool:
+            return (value > 0 or math.isclose(0, value)) and (value < 1 or
+                                                              math.isclose(1, value))
+
+        if not (is_valid_normalized_value(normalized_x) and
+                is_valid_normalized_value(normalized_y)):
+            # TODO: Draw coordinates even if it's outside of the image bounds.
+            return None
+        x_px = min(math.floor(normalized_x * image_width), image_width - 1)
+        y_px = min(math.floor(normalized_y * image_height), image_height - 1)
+        return x_px, y_px
+
+    def get_face_box(self, image, detection):
+        if not detection.location_data:
+            return
+        if image.shape[2] != 3:
+            raise ValueError('Input image must contain three channel rgb data.')
+        image_rows, image_cols, _ = image.shape
+
+        location = detection.location_data
+
+        # Draws bounding box if exists.
+        if not location.HasField('relative_bounding_box'):
+            return
+        relative_bounding_box = location.relative_bounding_box
+        rect_start_point = self._normalized_to_pixel_coordinates(
+            relative_bounding_box.xmin, relative_bounding_box.ymin, image_cols,
+            image_rows)
+        rect_end_point = self._normalized_to_pixel_coordinates(
+            relative_bounding_box.xmin + relative_bounding_box.width,
+            relative_bounding_box.ymin + relative_bounding_box.height, image_cols,
+            image_rows)
+        return rect_start_point, rect_end_point
+
     def load_video(self, *args):
-        y = 150
-        x = 175
-        h = 240
-        w = 300
         # read frame from opencv
         if self.capture is None:
             self.clock.cancel()
             self.capture.release()
 
+        box = self.detect_face()
         ret, frame = self.capture.read()
-        self.frame = frame[y:y + h, x:x + w]
 
-        # Flip horizontal and convert image to texture
-        buffer = cv2.flip(self.frame, 0).tobytes()
-        texture = Texture.create(size=(self.frame.shape[1], self.frame.shape[0]), colorfmt='bgr')
-        texture.blit_buffer(buffer, colorfmt='bgr', bufferfmt='ubyte')
-        self.root.ids['web_feed'].texture = texture
+        if box is not None:
+            start, end = self.get_face_box(frame, detection=box)
+            if start is not None and end is not None:
+                sx, sy = start
+                ex, ey = end
+                self.frame = frame[sy:ey, sx: ex]
+
+                # Flip horizontal and convert image to texture
+                buffer = cv2.flip(self.frame, 0).tobytes()
+                texture = Texture.create(size=(self.frame.shape[1], self.frame.shape[0]), colorfmt='bgr')
+                texture.blit_buffer(buffer, colorfmt='bgr', bufferfmt='ubyte')
+                self.root.ids['web_feed'].texture = texture
+        else:
+            print('face out of frame')
 
     def take_picture(self, index):
         # ensuring directory for later deletion
-        directory = r'C:\Users\Alex Estrada\PycharmProjects\FaceMeshSeniorDesign\temp_images'
+        directory = r'..\temp_images'
         os.chdir(directory)
         # keep track of number of pics taken
         self.num_of_pics += 1
@@ -139,15 +221,9 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
         elif index == 3:
             self.image4 = frame
             cv2.imwrite(name, self.image4)
-        # elif index == 4:
-        #     self.image5 = frame
-        #     cv2.imwrite(name, self.image5)
-        # elif index == 5:
-        #     self.image6 = frame
-        #     cv2.imwrite(name, self.image6)
 
         # calling newly created image
-        self.root.ids[id_name].source = directory + "\\" + name
+        self.root.ids[id_name].source = directory + "/" + name
 
     def change_texture(self, index, root):
         expressions = ["NEUTRAL", "SMILE", "RAISE EYEBROWS", "FROWN"]
@@ -161,18 +237,27 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def show_mp_results(self, bob):
         bob.ids[
-            'mp_image1'].source = r'C:\Users\Alex Estrada\PycharmProjects\FaceMeshSeniorDesign\temp_images\MP_img1.jpg'
+            'mp_image1'].source = r'../temp_images/MP_img1.jpg'
         bob.ids[
-            'mp_image2'].source = r'C:\Users\Alex Estrada\PycharmProjects\FaceMeshSeniorDesign\temp_images\MP_img2.jpg'
+            'mp_image2'].source = r'../temp_images/MP_img2.jpg'
         bob.ids[
-            'mp_image3'].source = r'C:\Users\Alex Estrada\PycharmProjects\FaceMeshSeniorDesign\temp_images\MP_img3.jpg'
+            'mp_image3'].source = r'../temp_images/MP_img3.jpg'
         bob.ids[
-            'mp_image4'].source = r'C:\Users\Alex Estrada\PycharmProjects\FaceMeshSeniorDesign\temp_images\MP_img4.jpg'
+            'mp_image4'].source = r'../temp_images/MP_img4.jpg'
 
-        # bob.ids['LeftAlt'].text = "Avg. Left Alteration: " + str(self.results[1])
-        # bob.ids['RightAlt'].text = "Avg. Right Alteration: " + str(self.results[0])
+        bob.ids['LeftAlt'].text = "Data Collection Successful"
+        bob.ids['RightAlt'].text = "ID Recorded: " + self.profile_id
         # bob.ids['nrValue'].text = "nR-Value: " + str(self.results[2])
         # bob.ids['nu_rValue'].text = "nu_r-Value: " + str(self.results[3])
+
+    def profile_setup(self, root):
+        self.profile_id = root.ids['name'].text
+        self.profile_date = root.ids['date'].text
+        self.profile_comments = root.ids['comment'].text
+
+    def profile_checker(self):
+        if self.profile_id is None or self.profile_id == '':
+            self.profile_id = 'UNKNOWN'
 
     def MP_Method(self):
         pre_images = [self.image1, self.image2, self.image3, self.image4]
@@ -187,7 +272,7 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
         # MediaPipe
         image_test = MediaPipe_Method(self.refs, post_images)
-        original_dicts, mirrored_dicts, mp_imgs, mp_mirrored_imgs = image_test.mp_run("", 0)
+        original_dicts, mirrored_dicts, mp_imgs, mp_mirrored_imgs = image_test.mp_run(self.profile_id, 1)
 
         self.mp_result1 = mp_imgs[0]
         self.mp_result2 = mp_imgs[1]
@@ -220,21 +305,18 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def refresh_test(self, root):
         root.ids["label1"].text = "START"
-        root.ids["web_feed"].source = r'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo ' \
-                                      r'Images/TestLiveStream.png '
-        root.ids["image1"].source = r'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo ' \
-                                    r'Images/4.png '
-        root.ids["image2"].source = r'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo ' \
-                                    r'Images/5.png '
-        root.ids["image3"].source = r'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo ' \
-                                    r'Images/6.png '
-        root.ids["image4"].source = r'C:/Users\Alex Estrada/PycharmProjects/FaceMeshSeniorDesign/Kivy Logo ' \
-                                    r'Images/7.png '
+        root.ids["web_feed"].source = r'../Kivy Logo Images/TestLiveStream.png'
+        root.ids["image1"].source = r'../Kivy Logo Images/4.png'
+        root.ids["image2"].source = r'../Kivy Logo Images/5.png'
+        root.ids["image3"].source = r'../Kivy Logo Images/6.png'
+        root.ids["image4"].source = r'../Kivy Logo Images/7.png'
 
     def delete_temps(self):
-        for filename in os.listdir(r'C:\Users\Alex Estrada\PycharmProjects\FaceMeshSeniorDesign\temp_images'):
-            # print(filename)
-            os.remove(filename)
+        for filename in os.listdir(r'../temp_images'):
+            try:
+                os.remove('*')
+            except OSError:
+                pass
         return print("ALL TEMP PHOTOS REMOVED")
 
 
@@ -272,13 +354,15 @@ class MyApp(MDApp):
         screen_manager.add_widget(Builder.load_file("mpFaceMesh.kv"))
         screen_manager.add_widget(Builder.load_file("profileScreen.kv"))
         screen_manager.add_widget(Builder.load_file("results_page.kv"))
+        screen_manager.add_widget(Builder.load_file("instructions_page.kv"))
+        screen_manager.add_widget(Builder.load_file("schedule_page.kv"))
 
         return screen_manager
 
     def on_start(self):
         # 15 sec delay
-        # screen_manager.current = 'MPFaceMesh'
-        Clock.schedule_once(self.change_screen, 1)
+        screen_manager.current = 'UserProfile'
+        # Clock.schedule_once(self.change_screen, 1)
 
     def change_screen(self, *args):
         screen_manager.current = "MainScreen"

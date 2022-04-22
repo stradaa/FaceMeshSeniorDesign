@@ -61,11 +61,11 @@ MDScreen:
                 md_bg_color: (1, 1, 1, 1)
                 id: container
                 TwoLineListItem:
-                    text: "Full Face Exam"
-                    secondary_text: "2/23/2022"
-                TwoLineListItem:
-                    text: "Partial Face Exam"
-                    secondary_text: "2/19/2022"
+                    text: "Support Coming Soon"
+                    # secondary_text: "2/23/2022"
+                #TwoLineListItem:
+                 #   text: "Partial Face Exam"
+                  #  secondary_text: "2/19/2022"
 
     FloatLayout:
         MDRectangleFlatButton:
@@ -78,4 +78,6 @@ MDScreen:
             pos_hint: {'center_x': 0.5, 'center_y': 0.1}
             size_hint: (0.4, 0.08)
             font_size: self.width/12
-            on_press: root.manager.current = "MPFaceMesh"
+            on_release:
+                app.MP.profile_checker()
+                app.go_back_screen_once("MPFaceMesh")

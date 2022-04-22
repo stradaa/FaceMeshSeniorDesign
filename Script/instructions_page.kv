@@ -1,0 +1,64 @@
+MDScreen:
+    name: "Instructions"
+
+    canvas.before:
+        Color:
+            rgba: (227/255, 238/255, 229/255, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDToolbar:
+            title: 'Instructions'
+            md_bg_color: (39/255, 122/255, 81/255, 1)
+            specific_text_color: [1, 1, 1, 1]
+            left_action_items: [["backburger", lambda x: app.change_screen()]]
+
+        FloatLayout:
+            spacing: 10
+            padding: 10
+
+            MDLabel:
+                text: "Welcome to the NeuroVA Exam!"
+                font_style: 'H2'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+                size_hint: (0.6, 0.1)
+                font_size: self.width/7
+
+            MDLabel:
+                text: "This exam will take less than 5 minutes to complete. You will be guided through the exam to take 4 different photos of your face making the following expressions"
+                font_style: 'H2'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.75}
+                size_hint: (0.9, 0.08)
+                font_size: self.width/19
+
+            MDLabel:
+                text: "1.- Relaxed face\n2.- Smiling\n3. -Frowning with furrowed eyebrows\n4. Surprised face with raised eyebrows"
+                font_style: 'H2'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+                size_hint: (0.9, 0.08)
+                font_size: self.width/19
+
+            MDLabel:
+                text: "Once you have taken these 4 photos you’re done! Your neurologist will receive your results and discuss them with you during your next appointment. "
+                font_style: 'H2'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+                size_hint: (0.9, 0.1)
+                font_size: self.width/30
+
+            MDLabel:
+                text: "Tips for Good Photo-Taking"
+                font_style: 'H2'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+                size_hint: (0.7, 0.1)
+                font_size: self.width/14
+
+            MDLabel:
+                text: "-Have good lighting (taking pictures in front of a window works great)\n-Take all 4 images at the same angle and distance from the camera\n-Camera should be at eye level\n-Face the camera straight on\n-Align your face in the face frame\n-Make sure your camera isn’t dirty or broken"
+                font_style: 'H2'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.20}
+                size_hint: (0.9, 0.08)
+                font_size: self.width/20
