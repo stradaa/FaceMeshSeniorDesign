@@ -30,13 +30,15 @@ from kivymd.uix.datatables import MDDataTable
 import os
 import math
 import mediapipe as mp
+import csv
 from kivy.config import Config
+import pandas as pd
 Config.set('graphics', 'resizable', True)
 Config.set('graphics', 'width', '750')
 Config.set('graphics', 'height', '1200')
 Config.write()
 
-Window.size = (90 * 7, 160 * 7)  # remove this for deployment
+Window.size = (90 * 7, 160 * 8)  # remove this for deployment
 
 resource_add_path('.')
 
@@ -108,7 +110,7 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
     def load_frame(self, id, root):
         self.root = root
-        self.capture = cv2.VideoCapture(1)
+        self.capture = cv2.VideoCapture(0)
         self.clock = Clock.schedule_interval(self.load_video, 1.0 / 30.0)
 
     def detect_face(self):
@@ -202,6 +204,7 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
     def take_picture(self, index):
         # ensuring directory for later deletion
         directory = r'./temp_images'
+
         # keep track of number of pics taken
         self.num_of_pics += 1
         # creating new image source
@@ -274,6 +277,18 @@ class MPFaceMesh(Screen, Image, MDBoxLayout):
 
         if len(post_images) != 4:
             print("NOT ALL EXPRESSIONS ARE BEING TESTED")
+
+        # saving images to file
+        directory2 = r'./data/raw_images'
+        for idx, img in enumerate(post_images):
+            cv2.imwrite(directory2 + "/" + self.profile_id + str(idx) + '.jpg', img)
+
+        # saving comments and date to csv
+        directory3 = r'./data/patient_id_date_info.csv'
+        # file = pd.DataFrame({'ID': self.profile_id, 'Date': self.profile_date, 'Comments': self.profile_comments})
+        with open(directory3, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([self.profile_id, self.profile_date, self.profile_comments])
 
         # MediaPipe
         image_test = MediaPipe_Method(self.refs, post_images)
